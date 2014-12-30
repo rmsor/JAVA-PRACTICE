@@ -1,0 +1,915 @@
+package ui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+
+import module.CategoryTitle;
+import module.Preference;
+import module.Transaction;
+
+import com.toedter.calendar.JDateChooser;
+
+import db.SqlConnection;
+
+class Main extends JFrame {
+	private Main frame;
+	private JPanel contentPane;
+	private JTable table_1,table_2;
+	private JTextField textField_2, textField_7,
+			txtfldCategoryName, textField_9, textField_4,
+			textField_16, textField_17, textField_1, textField_6, textField_20,
+			textField_5, textField_18, textField_19, txtfldUserSetupUserName,
+			txtfldUserSetupEmail, textField_12;
+	private JTextField txtExpAmount, txtIncAmount;
+	private JPasswordField txtfldUserSetupPassword;
+	private JComboBox comboExpenseType, txtExpCategoryType, txtIncCategoryType,
+			comboIncomeType, txtfldCategoryType;
+	private JDateChooser expDate;
+	private Preference pf;
+	private SqlConnection sql;
+
+	/*-------------------------samuel----------------------
+	 *
+	 */
+
+	/**
+	 * Launch the application.
+	 */
+	public void run() {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					frame = new Main();
+					frame.setVisible(true);
+					frame.setLocation(450, 200);
+					frame.setResizable(false);
+					frame.setSize(700, 600);
+					// frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public class CategoryCombo {
+
+		private String value;
+		private String text;
+
+		public CategoryCombo(String value, String text) {
+			this.value = value;
+			this.text = text;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public String getText() {
+			return text;
+		}
+
+		@Override
+		public String toString() {
+			return text;
+		}
+	}
+
+	/**
+	 * Create the frame.
+	 * 
+	 * @throws ClassNotFoundException
+	 */
+	public Main() throws ClassNotFoundException {
+		pf = new Preference();
+		sql = new SqlConnection();
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 617, 464);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPane);
+
+		JTabbedPane MainPane = new JTabbedPane(JTabbedPane.TOP);
+		contentPane.add(MainPane, BorderLayout.CENTER);
+
+		JTabbedPane Expense = new JTabbedPane(JTabbedPane.TOP);
+		MainPane.addTab("EXPENSES", null, Expense, null);
+
+		JPanel ExpenseAdd = new JPanel();
+		Expense.addTab("Add", null, ExpenseAdd, null);
+		ExpenseAdd.setLayout(null);
+
+		JPanel panel_2 = new JPanel();
+		panel_2.setLayout(null);
+		panel_2.setBorder(new TitledBorder(null, "Add Expense",
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_2.setBounds(43, 32, 469, 234);
+		ExpenseAdd.add(panel_2);
+
+		JLabel label_2 = new JLabel("Expense Category");
+		label_2.setBounds(71, 90, 77, 14);
+		panel_2.add(label_2);
+
+		txtExpCategoryType = new JComboBox();
+		txtExpCategoryType.setBounds(160, 87, 140, 20);
+		// System.out.println(pf.getVal("user_id"));
+		String cond = "and cat.user_id='" + pf.getVal("user_id")
+				+ "' and cat_type='E'";
+		List<CategoryTitle> categoryList = sql.getCategoryTitle(cond);
+		for (int i = 0; i < categoryList.size(); i++) {
+			CategoryCombo cmb = new CategoryCombo(categoryList.get(i)
+					.getCategoryId(), categoryList.get(i).getCatName());
+			txtExpCategoryType.addItem(cmb);
+		}
+		panel_2.add(txtExpCategoryType);
+
+		JLabel label_1 = new JLabel("Amount ");
+		label_1.setBounds(71, 59, 40, 14);
+		panel_2.add(label_1);
+
+		txtExpAmount = new JTextField();
+		txtExpAmount.setColumns(10);
+		txtExpAmount.setBounds(160, 56, 140, 20);
+		panel_2.add(txtExpAmount);
+
+		JLabel label = new JLabel("Expense Method");
+		label.setHorizontalAlignment(SwingConstants.TRAILING);
+		label.setBounds(71, 24, 62, 14);
+		panel_2.add(label);
+
+		comboExpenseType = new JComboBox();
+		comboExpenseType.setBounds(160, 21, 140, 20);
+		comboExpenseType.addItem("Cash");
+		comboExpenseType.addItem("Credit");
+		comboExpenseType.addItem("Cheque");
+		panel_2.add(comboExpenseType);
+
+		expDate = new JDateChooser();
+		expDate.setBounds(157, 118, 143, 20);
+		panel_2.add(expDate);
+
+		JLabel label_11 = new JLabel("Date");
+		label_11.setBounds(71, 124, 46, 14);
+		panel_2.add(label_11);
+
+		JButton buttonAddExpense = new JButton("Add");
+		buttonAddExpense.setBounds(147, 189, 71, 23);
+		buttonAddExpense.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == buttonAddExpense) { // add new Category
+															// Title
+					String userId = pf.getVal("user_id");
+					String expType = comboExpenseType.getSelectedItem()
+							.toString();
+					CategoryCombo cmb = (CategoryCombo) txtExpCategoryType
+							.getSelectedItem();
+					String expCategoryId = cmb.getValue();
+					String expAmount = txtExpAmount.getText();
+					java.sql.Date expD = new java.sql.Date(expDate.getDate()
+							.getTime());
+					String expeDate = expD.toString();
+					String amount = txtExpAmount.getText();
+					String SQL = String
+							.format("insert into transactions(category_id,amount,inc_exp,trans_type,trans_date,user_id,status) values('%s','%s','%s','%s','%s','%s','%s')",
+									expCategoryId, expAmount, "E", expType,
+									expeDate, userId, "A");
+					if (sql.executeUpdateStatement(SQL) > 0) {
+						JOptionPane.showMessageDialog(frame,
+								"Inserted Successfully.");
+					}
+				}
+
+			}
+		});
+		panel_2.add(buttonAddExpense);
+
+		JButton buttonExpCan = new JButton("Cancel");
+		buttonExpCan.setBounds(229, 189, 81, 23);
+		panel_2.add(buttonExpCan);
+		JPanel ExpenseUpdate = new JPanel();
+		Expense.addTab("Update", null, ExpenseUpdate, null);
+
+		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(new TitledBorder(UIManager
+				.getBorder("TitledBorder.border"), "Update",
+				TitledBorder.LEADING, TitledBorder.TOP, null,
+				new Color(0, 0, 0)));
+
+		JLabel lblTransactionId = new JLabel("Transaction ID");
+
+		textField_9 = new JTextField();
+		textField_9.setColumns(10);
+		GroupLayout gl_ExpenseUpdate = new GroupLayout(ExpenseUpdate);
+		gl_ExpenseUpdate
+				.setHorizontalGroup(gl_ExpenseUpdate
+						.createParallelGroup(Alignment.LEADING)
+						.addGroup(
+								gl_ExpenseUpdate
+										.createSequentialGroup()
+										.addGap(46)
+										.addGroup(
+												gl_ExpenseUpdate
+														.createParallelGroup(
+																Alignment.LEADING)
+														.addGroup(
+																gl_ExpenseUpdate
+																		.createSequentialGroup()
+																		.addComponent(
+																				lblTransactionId)
+																		.addGap(18)
+																		.addComponent(
+																				textField_9,
+																				GroupLayout.PREFERRED_SIZE,
+																				97,
+																				GroupLayout.PREFERRED_SIZE))
+														.addComponent(
+																panel_1,
+																GroupLayout.PREFERRED_SIZE,
+																460,
+																GroupLayout.PREFERRED_SIZE))
+										.addContainerGap(39, Short.MAX_VALUE)));
+		gl_ExpenseUpdate
+				.setVerticalGroup(gl_ExpenseUpdate
+						.createParallelGroup(Alignment.TRAILING)
+						.addGroup(
+								Alignment.LEADING,
+								gl_ExpenseUpdate
+										.createSequentialGroup()
+										.addGap(23)
+										.addGroup(
+												gl_ExpenseUpdate
+														.createParallelGroup(
+																Alignment.BASELINE)
+														.addComponent(
+																lblTransactionId)
+														.addComponent(
+																textField_9,
+																GroupLayout.PREFERRED_SIZE,
+																GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE))
+										.addGap(30)
+										.addComponent(panel_1,
+												GroupLayout.PREFERRED_SIZE,
+												186, GroupLayout.PREFERRED_SIZE)
+										.addContainerGap(54, Short.MAX_VALUE)));
+		panel_1.setLayout(null);
+
+		JLabel label_7 = new JLabel("Amount ");
+		label_7.setBounds(43, 37, 40, 14);
+		panel_1.add(label_7);
+
+		JLabel label_6 = new JLabel("Income Type");
+		label_6.setBounds(216, 37, 62, 14);
+		panel_1.add(label_6);
+		label_6.setHorizontalAlignment(SwingConstants.TRAILING);
+
+		textField_7 = new JTextField();
+		textField_7.setBounds(93, 34, 96, 20);
+		panel_1.add(textField_7);
+		textField_7.setColumns(10);
+
+		JComboBox comboBox_2 = new JComboBox();
+		comboBox_2.setBounds(298, 34, 118, 20);
+		panel_1.add(comboBox_2);
+
+		textField_2 = new JTextField();
+		textField_2.setBounds(93, 90, 96, 20);
+		panel_1.add(textField_2);
+		textField_2.setColumns(10);
+
+		JLabel label_8 = new JLabel("New label");
+		label_8.setBounds(37, 93, 46, 14);
+		panel_1.add(label_8);
+
+		JDateChooser dateChooser_2 = new JDateChooser();
+		dateChooser_2.setBounds(298, 90, 132, 20);
+		panel_1.add(dateChooser_2);
+
+		JButton button_9 = new JButton("Update");
+		button_9.setBounds(99, 152, 67, 23);
+		panel_1.add(button_9);
+
+		JButton btnNewButton_3 = new JButton("Fetch");
+		btnNewButton_3.setBounds(172, 152, 59, 23);
+		panel_1.add(btnNewButton_3);
+
+		JButton button_11 = new JButton("Canceal");
+		button_11.setBounds(237, 152, 71, 23);
+		panel_1.add(button_11);
+
+		JLabel lblDate = new JLabel("Date");
+		lblDate.setBounds(216, 93, 46, 14);
+		panel_1.add(lblDate);
+		ExpenseUpdate.setLayout(gl_ExpenseUpdate);
+
+		JPanel ExpenseDelete = new JPanel();
+		Expense.addTab("Delete", null, ExpenseDelete, null);
+		ExpenseDelete.setLayout(null);
+
+		JLabel label_3 = new JLabel("Transaction ID");
+		label_3.setBounds(43, 14, 70, 14);
+		ExpenseDelete.add(label_3);
+
+		textField_1 = new JTextField();
+		textField_1.setColumns(10);
+		textField_1.setBounds(131, 11, 97, 20);
+		ExpenseDelete.add(textField_1);
+
+		JPanel panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBorder(new TitledBorder(UIManager
+				.getBorder("TitledBorder.border"), "Delete",
+				TitledBorder.LEADING, TitledBorder.TOP, null,
+				new Color(0, 0, 0)));
+		panel.setBounds(43, 61, 460, 186);
+		ExpenseDelete.add(panel);
+
+		JLabel label_4 = new JLabel("Amount ");
+		label_4.setBounds(43, 37, 40, 14);
+		panel.add(label_4);
+
+		JLabel label_5 = new JLabel("Income Type");
+		label_5.setHorizontalAlignment(SwingConstants.TRAILING);
+		label_5.setBounds(216, 37, 62, 14);
+		panel.add(label_5);
+
+		textField_6 = new JTextField();
+		textField_6.setEditable(false);
+		textField_6.setColumns(10);
+		textField_6.setBounds(93, 34, 96, 20);
+		panel.add(textField_6);
+
+		JComboBox comboBox_1 = new JComboBox();
+		comboBox_1.setEnabled(false);
+		comboBox_1.setBounds(298, 34, 118, 20);
+		panel.add(comboBox_1);
+
+		textField_20 = new JTextField();
+		textField_20.setEnabled(false);
+		textField_20.setColumns(10);
+		textField_20.setBounds(93, 90, 96, 20);
+		panel.add(textField_20);
+
+		JLabel label_20 = new JLabel("New label");
+		label_20.setBounds(37, 93, 46, 14);
+		panel.add(label_20);
+
+		JDateChooser dateChooser_1 = new JDateChooser();
+		dateChooser_1.getSpinner().setEnabled(false);
+		dateChooser_1.setBounds(298, 90, 132, 20);
+		panel.add(dateChooser_1);
+
+		JButton btnDelete = new JButton("Delete");
+		btnDelete.setBounds(136, 152, 67, 23);
+		panel.add(btnDelete);
+
+		JButton button_1 = new JButton("Canceal");
+		button_1.setBounds(221, 152, 71, 23);
+		panel.add(button_1);
+
+		JTabbedPane Income = new JTabbedPane(JTabbedPane.TOP);
+		MainPane.addTab("INCOME", null, Income, null);
+
+		JPanel AddIncome = new JPanel();
+		Income.addTab("Add", null, AddIncome, null);
+		AddIncome.setLayout(null);
+
+		JPanel pnlIncomeAdd = new JPanel();
+		pnlIncomeAdd.setBounds(23, 34, 469, 234);
+		pnlIncomeAdd.setBorder(new TitledBorder(null, "Add Income",
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		AddIncome.add(pnlIncomeAdd);
+		pnlIncomeAdd.setLayout(null);
+
+		JLabel lblExpeseCategoryType = new JLabel("Income Category");
+		lblExpeseCategoryType.setBounds(71, 90, 77, 14);
+		pnlIncomeAdd.add(lblExpeseCategoryType);
+
+		txtIncCategoryType = new JComboBox();
+		txtIncCategoryType.setBounds(160, 87, 140, 20);
+		// System.out.println(pf.getVal("user_id"));
+		String cond1 = "and cat.user_id='" + pf.getVal("user_id")
+				+ "' and cat_type='I'";
+		List<CategoryTitle> categoryList1 = sql.getCategoryTitle(cond1);
+		for (int i = 0; i < categoryList1.size(); i++) {
+			CategoryCombo cmb = new CategoryCombo(categoryList1.get(i)
+					.getCategoryId(), categoryList1.get(i).getCatName());
+			txtIncCategoryType.addItem(cmb);
+		}
+		pnlIncomeAdd.add(txtIncCategoryType);
+
+		JLabel label_10 = new JLabel("Amount ");
+		label_10.setBounds(71, 59, 40, 14);
+		pnlIncomeAdd.add(label_10);
+
+		txtIncAmount = new JTextField();
+		txtIncAmount.setBounds(160, 56, 140, 20);
+		pnlIncomeAdd.add(txtIncAmount);
+		txtIncAmount.setColumns(10);
+
+		JLabel lblDate_1 = new JLabel("Date");
+		lblDate_1.setBounds(71, 124, 46, 14);
+		pnlIncomeAdd.add(lblDate_1);
+
+		JDateChooser incDate = new JDateChooser();
+		incDate.setBounds(157, 118, 143, 20);
+		pnlIncomeAdd.add(incDate);
+
+		JLabel label_9 = new JLabel("Income Method");
+		label_9.setBounds(71, 24, 62, 14);
+		pnlIncomeAdd.add(label_9);
+		label_9.setHorizontalAlignment(SwingConstants.TRAILING);
+
+		comboIncomeType = new JComboBox();
+		comboIncomeType.setBounds(160, 21, 140, 20);
+		comboIncomeType.addItem("Cash");
+		comboIncomeType.addItem("Credit");
+		comboIncomeType.addItem("Cheque");
+		pnlIncomeAdd.add(comboIncomeType);
+
+		JButton buttonAddIncome = new JButton("Add");
+		buttonAddIncome.setBounds(147, 189, 51, 23);
+		pnlIncomeAdd.add(buttonAddIncome);
+
+		buttonAddIncome.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == buttonAddIncome) { // add new Category
+														// Title
+					String userId = pf.getVal("user_id");
+					String expType = comboIncomeType.getSelectedItem()
+							.toString();
+					CategoryCombo cmb = (CategoryCombo) txtIncCategoryType
+							.getSelectedItem();
+					String expCategoryId = cmb.getValue();
+					String expAmount = txtIncAmount.getText();
+					java.sql.Date expD = new java.sql.Date(incDate.getDate()
+							.getTime());
+					String expeDate = expD.toString();
+					String amount = txtExpAmount.getText();
+					String SQL = String
+							.format("insert into transactions(category_id,amount,inc_exp,trans_type,trans_date,user_id,status) values('%s','%s','%s','%s','%s','%s','%s')",
+									expCategoryId, expAmount, "I", expType,
+									expeDate, userId, "A");
+					if (sql.executeUpdateStatement(SQL) > 0) {
+						JOptionPane.showMessageDialog(frame,
+								"Inserted Successfully.");
+					}
+				}
+
+			}
+		});
+
+		JButton button_15 = new JButton("Cancel");
+		button_15.setBounds(229, 189, 71, 23);
+		pnlIncomeAdd.add(button_15);
+
+		JPanel UpdateIncome = new JPanel();
+		Income.addTab("Update", null, UpdateIncome, null);
+
+		JPanel pnlExpenseUpdate = new JPanel();
+		pnlExpenseUpdate.setLayout(null);
+		pnlExpenseUpdate.setBorder(new TitledBorder(UIManager
+				.getBorder("TitledBorder.border"), "Update",
+				TitledBorder.LEADING, TitledBorder.TOP, null,
+				new Color(0, 0, 0)));
+
+		JLabel label_12 = new JLabel("Amount ");
+		label_12.setBounds(43, 37, 40, 14);
+		pnlExpenseUpdate.add(label_12);
+
+		JLabel label_13 = new JLabel("Income Type");
+		label_13.setHorizontalAlignment(SwingConstants.TRAILING);
+		label_13.setBounds(240, 37, 62, 14);
+		pnlExpenseUpdate.add(label_13);
+
+		textField_4 = new JTextField();
+		textField_4.setColumns(10);
+		textField_4.setBounds(93, 34, 113, 20);
+		pnlExpenseUpdate.add(textField_4);
+
+		JComboBox comboBox_4 = new JComboBox();
+		comboBox_4.setBounds(312, 34, 118, 20);
+		pnlExpenseUpdate.add(comboBox_4);
+
+		textField_16 = new JTextField();
+		textField_16.setColumns(10);
+		textField_16.setBounds(93, 90, 113, 20);
+		pnlExpenseUpdate.add(textField_16);
+
+		JLabel lblUserId_1 = new JLabel("User ID");
+		lblUserId_1.setBounds(37, 93, 46, 14);
+		pnlExpenseUpdate.add(lblUserId_1);
+
+		JDateChooser dateChooser_4 = new JDateChooser();
+		dateChooser_4.setBounds(312, 90, 132, 20);
+		pnlExpenseUpdate.add(dateChooser_4);
+
+		textField_17 = new JTextField();
+		textField_17.setColumns(10);
+
+		JLabel lblTransactionId_1 = new JLabel("Transaction ID");
+		GroupLayout gl_UpdateIncome = new GroupLayout(UpdateIncome);
+		gl_UpdateIncome
+				.setHorizontalGroup(gl_UpdateIncome
+						.createParallelGroup(Alignment.LEADING)
+						.addGroup(
+								gl_UpdateIncome
+										.createSequentialGroup()
+										.addGap(39)
+										.addGroup(
+												gl_UpdateIncome
+														.createParallelGroup(
+																Alignment.LEADING)
+														.addGroup(
+																gl_UpdateIncome
+																		.createSequentialGroup()
+																		.addComponent(
+																				lblTransactionId_1)
+																		.addPreferredGap(
+																				ComponentPlacement.UNRELATED)
+																		.addComponent(
+																				textField_17,
+																				GroupLayout.PREFERRED_SIZE,
+																				106,
+																				GroupLayout.PREFERRED_SIZE))
+														.addComponent(
+																pnlExpenseUpdate,
+																GroupLayout.PREFERRED_SIZE,
+																479,
+																GroupLayout.PREFERRED_SIZE))
+										.addContainerGap(27, Short.MAX_VALUE)));
+		gl_UpdateIncome
+				.setVerticalGroup(gl_UpdateIncome
+						.createParallelGroup(Alignment.LEADING)
+						.addGroup(
+								gl_UpdateIncome
+										.createSequentialGroup()
+										.addGap(33)
+										.addGroup(
+												gl_UpdateIncome
+														.createParallelGroup(
+																Alignment.BASELINE)
+														.addComponent(
+																lblTransactionId_1)
+														.addComponent(
+																textField_17,
+																GroupLayout.PREFERRED_SIZE,
+																GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE))
+										.addGap(18)
+										.addComponent(pnlExpenseUpdate,
+												GroupLayout.PREFERRED_SIZE,
+												186, GroupLayout.PREFERRED_SIZE)
+										.addContainerGap(56, Short.MAX_VALUE)));
+
+		JLabel lblDate_2 = new JLabel("Date");
+		lblDate_2.setBounds(240, 93, 46, 14);
+		pnlExpenseUpdate.add(lblDate_2);
+
+		JButton btnNewButton_2 = new JButton("Fetch");
+		btnNewButton_2.setBounds(118, 152, 59, 23);
+		pnlExpenseUpdate.add(btnNewButton_2);
+
+		JButton btnUpdate = new JButton("Update");
+		btnUpdate.setBounds(195, 152, 67, 23);
+		pnlExpenseUpdate.add(btnUpdate);
+
+		JButton btnCanceal_1 = new JButton("Canceal");
+		btnCanceal_1.setBounds(280, 152, 71, 23);
+		pnlExpenseUpdate.add(btnCanceal_1);
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
+		UpdateIncome.setLayout(gl_UpdateIncome);
+
+		JPanel DeleteIncome = new JPanel();
+		Income.addTab("Delete", null, DeleteIncome, null);
+		DeleteIncome.setLayout(null);
+
+		JPanel panel_3 = new JPanel();
+		panel_3.setLayout(null);
+		panel_3.setBounds(0, 0, 545, 313);
+		DeleteIncome.add(panel_3);
+
+		JLabel label_15 = new JLabel("Transaction ID");
+		label_15.setBounds(45, 33, 70, 14);
+		panel_3.add(label_15);
+
+		textField_5 = new JTextField();
+		textField_5.setColumns(10);
+		textField_5.setBounds(133, 30, 97, 20);
+		panel_3.add(textField_5);
+
+		JPanel panel_4 = new JPanel();
+		panel_4.setLayout(null);
+		panel_4.setBorder(new TitledBorder(null, "Information",
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_4.setBounds(43, 76, 460, 205);
+		panel_3.add(panel_4);
+
+		JLabel label_16 = new JLabel("Amount ");
+		label_16.setBounds(43, 37, 40, 14);
+		panel_4.add(label_16);
+
+		JLabel label_17 = new JLabel("Income Type");
+		label_17.setHorizontalAlignment(SwingConstants.TRAILING);
+		label_17.setBounds(216, 37, 62, 14);
+		panel_4.add(label_17);
+
+		textField_18 = new JTextField();
+		textField_18.setEnabled(false);
+		textField_18.setColumns(10);
+		textField_18.setBounds(93, 34, 96, 20);
+		panel_4.add(textField_18);
+
+		JComboBox comboBox_5 = new JComboBox();
+		comboBox_5.setBounds(298, 34, 118, 20);
+		panel_4.add(comboBox_5);
+
+		textField_19 = new JTextField();
+		textField_19.setEnabled(false);
+		textField_19.setColumns(10);
+		textField_19.setBounds(93, 90, 96, 20);
+		panel_4.add(textField_19);
+
+		JLabel lblUserId_2 = new JLabel("User ID");
+		lblUserId_2.setBounds(37, 93, 46, 14);
+		panel_4.add(lblUserId_2);
+
+		JDateChooser dateChooser_5 = new JDateChooser();
+		dateChooser_5.getSpinner().setEnabled(false);
+		dateChooser_5.setBounds(298, 90, 132, 20);
+		panel_4.add(dateChooser_5);
+
+		JButton button_4 = new JButton("Delete");
+		button_4.setBounds(132, 152, 67, 23);
+		panel_4.add(button_4);
+
+		JButton button_2 = new JButton("Canceal");
+		button_2.setBounds(216, 152, 71, 23);
+		panel_4.add(button_2);
+
+		JLabel lblDate_3 = new JLabel("Date");
+		lblDate_3.setBounds(216, 93, 46, 14);
+		panel_4.add(lblDate_3);
+		button_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+			}
+		});
+
+		JPanel Category = new JPanel();
+		MainPane.addTab("Category", null, Category, null);
+		Category.setLayout(null);
+
+		JPanel CategoryPane = new JPanel();
+		CategoryPane.setBorder(new TitledBorder(null, "New Category",
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		CategoryPane.setBounds(84, 37, 368, 278);
+		Category.add(CategoryPane);
+		CategoryPane.setLayout(null);
+
+		JLabel lblCategoryName = new JLabel("Category Name");
+		lblCategoryName.setBounds(34, 63, 75, 14);
+		CategoryPane.add(lblCategoryName);
+
+		txtfldCategoryName = new JTextField();
+		txtfldCategoryName.setBounds(141, 60, 132, 20);
+		CategoryPane.add(txtfldCategoryName);
+		txtfldCategoryName.setColumns(10);
+
+		txtfldCategoryType = new JComboBox();
+		txtfldCategoryType.setBounds(141, 91, 132, 20);
+		CategoryCombo cmb1 = new CategoryCombo("I", "Income");
+		txtfldCategoryType.addItem(cmb1);
+		CategoryCombo cmb2 = new CategoryCombo("E", "Expenses");
+		txtfldCategoryType.addItem(cmb2);
+		CategoryPane.add(txtfldCategoryType);
+
+		JButton btnCategoryAdd = new JButton("Add");
+		btnCategoryAdd.setBounds(88, 226, 89, 23);
+		CategoryPane.add(btnCategoryAdd);
+
+		btnCategoryAdd.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == btnCategoryAdd) { // add new Category Title
+					String userId = pf.getVal("user_id");
+					// String catType =
+					// txtfldCategoryType.getSelectedItem().toString();
+					CategoryCombo cmb = (CategoryCombo) txtfldCategoryType
+							.getSelectedItem();
+					String catType = cmb.getValue();
+					String categoryName = txtfldCategoryName.getText();
+					String SQL = String
+							.format("insert into category_title(cat_name,cat_type,status,user_id) values('%s','%s','%s','%s')",
+									categoryName, catType, "Y", userId);
+					// System.out.println(SQL);
+					if (sql.executeUpdateStatement(SQL) > 0) {
+						JOptionPane.showMessageDialog(frame,
+								"Inserted Successfully.");
+					}
+				}
+
+			}
+		});
+
+		JButton btnCategoryCanceal = new JButton("Cancel");
+		btnCategoryCanceal.setBounds(196, 226, 89, 23);
+		CategoryPane.add(btnCategoryCanceal);
+
+		JLabel lblCategoryType = new JLabel("Category Type");
+		lblCategoryType.setBounds(34, 94, 75, 14);
+		CategoryPane.add(lblCategoryType);
+
+		JPanel UserSetup = new JPanel();
+		MainPane.addTab("User Setup", null, UserSetup, null);
+		UserSetup.setLayout(null);
+
+		JPanel panel_5 = new JPanel();
+		panel_5.setLayout(null);
+		panel_5.setBorder(new TitledBorder(UIManager
+				.getBorder("TitledBorder.border"), "User Setup",
+				TitledBorder.LEADING, TitledBorder.TOP, null,
+				new Color(0, 0, 0)));
+		panel_5.setBounds(80, 41, 368, 278);
+		UserSetup.add(panel_5);
+
+		JLabel lblUserSetupUserName = new JLabel("User Name");
+		lblUserSetupUserName.setBounds(56, 63, 75, 14);
+		panel_5.add(lblUserSetupUserName);
+
+		txtfldUserSetupUserName = new JTextField();
+		txtfldUserSetupUserName.setColumns(10);
+		txtfldUserSetupUserName.setBounds(141, 60, 118, 20);
+		panel_5.add(txtfldUserSetupUserName);
+
+		txtfldUserSetupEmail = new JTextField();
+		txtfldUserSetupEmail.setColumns(10);
+		txtfldUserSetupEmail.setBounds(141, 122, 118, 20);
+		panel_5.add(txtfldUserSetupEmail);
+
+		JLabel label_22 = new JLabel("User ID");
+		label_22.setBounds(364, 24, 36, 14);
+		panel_5.add(label_22);
+
+		JButton btnAddUser = new JButton("Add");
+		btnAddUser.setBounds(73, 226, 89, 23);
+		panel_5.add(btnAddUser);
+
+		btnAddUser.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == btnAddUser) { // add new Category Title
+					String userName = txtfldUserSetupUserName.getText();
+					String password = txtfldUserSetupPassword.getText();
+					String email = txtfldUserSetupEmail.getText();
+					String phone = textField_12.getText();
+
+					String SQL = String
+							.format("insert into users(user_name,password,email,phone,status) values('%s','%s','%s','%s','%s')",
+									userName, password, email, phone,"A");
+					if (sql.executeUpdateStatement(SQL) > 0) {
+						JOptionPane.showMessageDialog(frame,
+								"Inserted Successfully.");
+					}
+				}
+
+			}
+		});
+
+		JButton btnCanceal = new JButton("Cancel");
+		btnCanceal.setBounds(203, 226, 89, 23);
+		panel_5.add(btnCanceal);
+
+		JLabel lblUserSetupPassword = new JLabel("Password");
+		lblUserSetupPassword.setBounds(56, 94, 75, 14);
+		panel_5.add(lblUserSetupPassword);
+
+		txtfldUserSetupPassword = new JPasswordField();
+		txtfldUserSetupPassword.setBounds(141, 91, 118, 20);
+		panel_5.add(txtfldUserSetupPassword);
+
+		JLabel lblUserSetupEmail = new JLabel("Email");
+		lblUserSetupEmail.setBounds(56, 125, 46, 14);
+		panel_5.add(lblUserSetupEmail);
+
+		textField_12 = new JTextField();
+		textField_12.setBounds(141, 153, 118, 20);
+		panel_5.add(textField_12);
+		textField_12.setColumns(10);
+
+		JLabel lblUserSetupPhone = new JLabel("Phone");
+		lblUserSetupPhone.setBounds(56, 159, 46, 14);
+		panel_5.add(lblUserSetupPhone);
+
+		JPanel Report = new JPanel();
+		MainPane.addTab("Report", null, Report, null);
+		Report.setLayout(null);
+
+		JLabel lblReportType = new JLabel("Report Date From:");
+		lblReportType.setBounds(54, 41, 114, 14);
+		Report.add(lblReportType);
+		
+		JDateChooser expDateFrom = new JDateChooser();
+		expDateFrom.setBounds(180, 41, 142, 20);
+		Report.add(expDateFrom);
+		
+		JLabel lblReportTypeT = new JLabel("To:");
+		lblReportTypeT.setBounds(334, 41, 33, 14);
+		Report.add(lblReportTypeT);
+		
+		JDateChooser expDateTo = new JDateChooser();
+		expDateTo.setBounds(357, 41, 142, 20);
+		Report.add(expDateTo);
+
+		JScrollPane scrpnReport = new JScrollPane();
+		scrpnReport.setBounds(40, 134, 268, 184);
+		Report.add(scrpnReport);
+		
+		JScrollPane scrpnReport1 = new JScrollPane();
+		scrpnReport1.setBounds(322, 134, 268, 184);
+		Report.add(scrpnReport1);
+		
+		JButton btnShowReport = new JButton("Show Report");
+		btnShowReport.setBounds(240, 74, 142, 20);
+		Report.add(btnShowReport);
+		
+		JLabel lblIncomes = new JLabel("INCOMES");
+		lblIncomes.setBounds(120, 101, 71, 20);
+		Report.add(lblIncomes);
+		
+		JLabel lblExpenses = new JLabel("EXPENSES");
+		lblExpenses.setBounds(427, 103, 84, 18);
+		Report.add(lblExpenses);
+		
+		JLabel lblTotalInome = new JLabel("Total Inome: ");
+		lblTotalInome.setBounds(99, 336, 99, 16);
+		Report.add(lblTotalInome);
+		
+		JLabel lblTotalExpense = new JLabel("Total Expense:");
+		lblTotalExpense.setBounds(357, 336, 99, 16);
+		Report.add(lblTotalExpense);
+		
+		JLabel lblTotalIncomeTxt = new JLabel("");
+		lblTotalIncomeTxt.setBounds(210, 336, 98, 16);
+		Report.add(lblTotalIncomeTxt);
+		
+		JLabel lblTotalExpnenseTxt = new JLabel("");
+		lblTotalExpnenseTxt.setBounds(455, 336, 99, 16);
+		Report.add(lblTotalExpnenseTxt);
+		btnShowReport.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == btnShowReport) { // add new Category
+					java.sql.Date expDF = new java.sql.Date(expDateFrom.getDate().getTime());
+					java.sql.Date expDT = new java.sql.Date(expDateTo.getDate().getTime());// Title
+					String cond2="and cat.cat_type='E' and trans.trans_date between '"+expDF+"' and '"+expDT+"'" ;
+					List<Transaction> expenseList=sql.getIncomeSummary(cond2);
+					String cond3="and cat.cat_type='I' and trans.trans_date between '"+expDF+"' and '"+expDT+"'";
+					List<Transaction> incomeList=sql.getIncomeSummary(cond3);
+					Object[][] data=new Object[incomeList.size()][2];
+					for(int i=0;i<incomeList.size();i++){
+						data[i]={incomeList.get(i).getCatName(),incomeList.get(i).getAmount()};
+					}
+					String[] columns={"Income Category","Amount"};
+					table_1 = new JTable(data,columns);
+					scrpnReport.setViewportView(table_1);
+					String[] columns1={"Expense Category","Amount"};
+					table_2 = new JTable(expenseList,columns1);
+					scrpnReport1.setViewportView(table_2);
+				}
+
+			}
+		});
+	}
+}

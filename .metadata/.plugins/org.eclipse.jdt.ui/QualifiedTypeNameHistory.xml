@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="java.text.DecimalFormat"/>
+<fullyQualifiedTypeName name="assignment1.GreatestNumber"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="assignment3.LoanCalculator"/>
+<fullyQualifiedTypeName name="assignment3.CheckLeapYear"/>
+<fullyQualifiedTypeName name="java.text.SimpleDateFormat"/>
+<fullyQualifiedTypeName name="assignment3.Television"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="assignment6.GeometricObject"/>
+<fullyQualifiedTypeName name="db.SqlConnection"/>
+<fullyQualifiedTypeName name="java.sql.Statement"/>
+<fullyQualifiedTypeName name="module.Preference"/>
+<fullyQualifiedTypeName name="module.Transaction"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="module.CategoryTitle"/>
+<fullyQualifiedTypeName name="ui.Main.CategoryCombo"/>
+</qualifiedTypeNameHistroy>
